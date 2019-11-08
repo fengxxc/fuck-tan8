@@ -2,6 +2,11 @@
 
 ##  使用方法
 
-fucktan8.html 下载到本地，打开之。
+1. 克隆代码到本地；
+2. 安装node.js（随便一个版本，别太老就行），并将其添加到系统环境变量；
 
-为啥没弄github page？因为github page只支持https协议的请求，而tan8里的flash走的是http协议╮(╯▽╰)╭
+2. 进入app目录下，打开命令行，运行`node .\service.js`启动后台服务，默认监听8090端口；
+3. 打开浏览器（推荐chrome），访问"127.0.0.1:8090/fucktan8.html"。
+
+
+

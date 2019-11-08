@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<title>fuck tan8</title>
+	<style type="text/css">
+		html,body {
+			margin: 0;
+			height: 100%;
+			overflow: hidden;
+		}
+		h5,p {
+			margin: 0;
+			padding: 0;
+		}
+		button {
+			background: #DDF;
+			padding: 0 4px;
+			border: none;
+			border-radius: 2px;
+		}
+		button:hover {
+			background: #CCF;
+			cursor: pointer;
+		}
+		.searchBox {
+			position: absolute;
+			top: 0;left: 0;
+			width: 100%;
+			height: 30px;
+    		margin-left: 4px;
+    		background-color: #B6B6B6;
+		}
+		#aside {
+			position: absolute;
+			margin-top: 33px;
+			width: 250px;
+			height: 100%;
+		    overflow-y: auto;
+		    background-color: #FDFDFD;
+		}
+		#container {
+			margin-left: 250px;
+			height: 100%;
+		}
+		.item {
+			position: relative;
+			cursor: pointer;
+			border-bottom: 1px solid #eeeeee;
+		}
+		.item:hover {
+			background-color: #EEE;
+		}
+		span.sanjiao{ 
+			background: url(http://www.tan8.com/static/tan8/style/img/eyes.png?1) left center no-repeat; padding-left: 22px;
+		}
+		span.xin{ 
+			background: url(http://www.tan8.com/static/tan8/style/img/nozan_samall.png?190103) left center no-repeat; padding-left: 22px; background-size: 16px;
+		}
+	</style>
+</head>
+<body>
+	<div class="searchBox">
+		<input type="search" id="searchIpt" placeholder="" style="width: 250px; height: 100%;">
+		<button id="searchAsName" style="height: 100%;" title="将使用原网站的搜索功能">搜索名称</button>
+		<button id="searchAsURLBtn" style="height: 100%;">搜索URL</button>
+		<button id="searchAsYpidLBtn" style="height: 100%;">搜索yuepuId</button>
+	</div>
+	<div id="aside"></div>
+	<div id="container">
+		<object type="application/x-shockwave-flash" data="http://www.77music.com/flash/21558.swf" width="100%" height="100%" id="divflash" style="visibility:visible;">
+			<param name="wmode" value="Opaque">
+			<param name="allowNetworking" value="all">
+			<param name="allowFullScreen" value="true">
+		</object>
+	</div>
+<script type="text/javascript">
+	var flashdom = document.getElementById('divflash');
+	var searchIpt = document.getElementById('searchIpt');
+	var searchAsURLBtn = document.getElementById('searchAsURLBtn');
+	var searchAsYpidLBtn = document.getElementById('searchAsYpidLBtn');
+	var searchAsName = document.getElementById('searchAsName');
+	var aside = document.getElementById('aside');
+	searchAsURLBtn.onclick = function () {
+		url = searchIpt.value;
+		loadDataByYpurl(url);
+	};
+	searchAsYpidLBtn.onclick = function () {
+		var ypid = searchIpt.value;
+		loadDataByYpid(ypid);
+	};
+	searchAsName.onclick = function () {
+		var ypName = searchIpt.value;
+		ajaxGet('search-1-1-0.php?keyword=' + ypName, function (res) {
+			// filter
+			var cur = document.createElement('div');
+			cur.innerHTML = res;
+			cur = cur.getElementsByClassName('yuepuClassify_list_0422');
+			if (cur.length == 0) {
+				aside.innerHTML = '<p>木有找到结果~</p>';
+				return;
+			}
+			cur = cur[0].querySelectorAll('li');
+			
+			// deal data
+			var datas = [];
+			cur.forEach(el => {
+				var atag = el.querySelector('a');
+				var d = {
+					"href": atag.href,
+					"imgSrc": atag.querySelector('.img').querySelector('img').src,
+					"title": atag.querySelector('.text').querySelector('.title_color').innerText.trim(),
+					"details": atag.querySelector('.text').querySelector('.brief_color').innerText.trim().split(/\n/g).map(e => e.trim())
+				};
+				datas.push(d);
+				console.log(d);
+			});
+
+			var renderHtml = datas.reduce((h, d) => {
+				return h + `
+					<div class="item" onclick="loadDataByYpurl('${d.href}')">
+						<img src="${d.imgSrc}" alt="" width="30" height="30" style="float: right;"/>
+						<h5>${d.title}</h5>
+						<p style="font-size: 13px;color: #888;">
+							${d.details.reduce((_h, _d, _i) => _h + `<span class="${_i == 2 ? 'sanjiao' : _i == 3 ? 'xin' : ''}">${_d}</span>&emsp;`, '')}
+						</p>
+					</div>
+				`;
+			}, '');
+
+			aside.innerHTML = renderHtml;
+		});
+	};
+	function loadDataByYpid(ypid) {
+		flashdom.setAttribute('data', 'http://www.77music.com/flash/'+ ypid +'.swf');
+	}
+	function loadDataByYpurl(url) {
+		var ypid = getYpid(url);
+		loadDataByYpid(ypid);
+	}
+	function getYpid(url) {
+		return url.split('-')[1].split('.')[0];
+	}
+	function ajaxGet(url, callback) {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', url, true);
+		xhr.send();
+
+		xhr.onreadystatechange = function () {
+	    	if (xhr.readyState == 4 && xhr.status == 200) {
+	      		callback(xhr.responseText);
+	    	}
+		};
+	}
+</script>
+</body>
+</html>
