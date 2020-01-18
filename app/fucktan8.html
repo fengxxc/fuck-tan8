@@ -13,13 +13,14 @@
 			margin: 0;
 			padding: 0;
 		}
-		button {
+		.btn {
 			background: #DDF;
 			padding: 0 4px;
 			border: none;
 			border-radius: 2px;
+			height: 100%;
 		}
-		button:hover {
+		.btn:hover {
 			background: #CCF;
 			cursor: pointer;
 		}
@@ -42,6 +43,8 @@
 		#container {
 			margin-left: 250px;
 			height: 100%;
+			overflow: auto;
+			text-align: center;
 		}
 		.item {
 			position: relative;
@@ -62,20 +65,22 @@
 <body>
 	<div class="searchBox">
 		<input type="search" id="searchIpt" placeholder="" style="width: 250px; height: 100%;">
-		<button id="searchAsName" style="height: 100%;" title="将使用原网站的搜索功能">搜索名称</button>
-		<button id="searchAsURLBtn" style="height: 100%;">搜索URL</button>
-		<button id="searchAsYpidLBtn" style="height: 100%;">搜索yuepuId</button>
+		<button class="btn" id="searchAsName" title="将使用原网站的搜索功能">搜索名称</button>
+		<button class="btn" id="searchAsURLBtn">搜索URL</button>
+		<button class="btn" id="searchAsYpidLBtn">搜索yuepuId</button>
 	</div>
 	<div id="aside"></div>
 	<div id="container">
-		<object type="application/x-shockwave-flash" data="http://www.77music.com/flash/21558.swf" width="100%" height="100%" id="divflash" style="visibility:visible;">
+		<object type="application/x-shockwave-flash" data="http://www.77music.com/flash/21559.swf" width="100%" height="100%" id="flashDiv" style="visibility:visible;">
 			<param name="wmode" value="Opaque">
 			<param name="allowNetworking" value="all">
 			<param name="allowFullScreen" value="true">
 		</object>
+		<div id="ypimgDiv"></div>
 	</div>
 <script type="text/javascript">
-	var flashdom = document.getElementById('divflash');
+	var flashdom = document.getElementById('flashDiv');
+	var ypimgdom = document.getElementById('ypimgDiv');
 	var searchIpt = document.getElementById('searchIpt');
 	var searchAsURLBtn = document.getElementById('searchAsURLBtn');
 	var searchAsYpidLBtn = document.getElementById('searchAsYpidLBtn');
@@ -87,7 +92,7 @@
 	};
 	searchAsYpidLBtn.onclick = function () {
 		var ypid = searchIpt.value;
-		loadDataByYpid(ypid);
+		loadFlashByYpid(ypid);
 	};
 	searchAsName.onclick = function () {
 		var ypName = searchIpt.value;
@@ -131,12 +136,34 @@
 			aside.innerHTML = renderHtml;
 		});
 	};
-	function loadDataByYpid(ypid) {
+	function loadFlashByYpid(ypid) {
 		flashdom.setAttribute('data', 'http://www.77music.com/flash/'+ ypid +'.swf');
+	}
+	function loadImgByYpid(ypid) {
+		var ypMPageUrl = 'yuepu-' + ypid + '-m.html';
+		ajaxGet(ypMPageUrl, function (res) {
+			ypimgdom.innerHTML = '';
+			// filter
+			var cur = document.createElement('div');
+			cur.innerHTML = res;
+			cur = cur.getElementsByClassName('swiper-wrapper')[0];
+			var imgs = cur.querySelectorAll('img');
+			if (!imgs || imgs.length == 0) {
+				return;
+			}
+			var imgsHtml = '';
+			imgs.forEach(e => {
+				imgsHtml += `
+					<img src=${e.src}>
+				`;
+			});
+			ypimgdom.innerHTML = imgsHtml;
+		});
 	}
 	function loadDataByYpurl(url) {
 		var ypid = getYpid(url);
-		loadDataByYpid(ypid);
+		loadFlashByYpid(ypid);
+		loadImgByYpid(ypid);
 	}
 	function getYpid(url) {
 		return url.split('-')[1].split('.')[0];
@@ -152,6 +179,10 @@
 	    	}
 		};
 	}
+
+	// init
+	loadFlashByYpid('21559');
+	loadImgByYpid('21559');
 </script>
 </body>
 </html>
